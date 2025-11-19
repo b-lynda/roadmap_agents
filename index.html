@@ -10,9 +10,17 @@
     <section
       class="bg-white m-5 rounded-2xl flex flex-col py-5 justify-center shadow-sm"
     >
-      <h1 class="text-2xl text-blue-950 font-bold px-5">
+    <div class="flex justify-between items-center px-5">
+      <h1 class="text-2xl text-blue-950 font-bold">
         Configuration de la feuille de route
       </h1>
+       <div class="py-5">
+          <button class="bg-blue-500 text-white w-auto p-2 rounded-lg">
+            Actualiser les données
+          </button>
+        </div>
+    </div>
+      
       <div class="flex flex-col p-5 justify-between">
         <p class="font-semibold text-slate-600">Date</p>
         <input
@@ -35,12 +43,18 @@
           id=""
           class="py-2 rounded-md border-2 border-slate-300 my-0.5"
         />
-        <div class="py-5">
-          <button class="bg-blue-500 text-white w-auto p-2 rounded-lg">
-            Importer les données
-          </button>
-        </div>
-        <div class="relative my-0.5 w-full">
+      
+    
+      </div>
+    </section>
+    <section
+      id="participants-list"
+      class="bg-white m-5 rounded-2xl flex flex-col py-5 px-5 align-middle shadow-sm"
+    >
+      <div class="py-2.5">
+        <h2 class="font-semibold text-lg">Agents disponibles</h2>
+      </div>
+      <div class="relative my-0.5 w-full py-2.5">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -60,15 +74,6 @@
             class="py-2 rounded-md border-2 border-slate-300 w-full italic pl-10"
           />
         </div>
-      </div>
-    </section>
-    <section
-      id="participants-list"
-      class="bg-white m-5 rounded-2xl flex flex-col py-5 px-5 align-middle shadow-sm"
-    >
-      <div class="py-2.5">
-        <h2 class="font-semibold text-lg">Agents disponibles</h2>
-      </div>
       <div class="flex justify-between items-center rounded-md border-2 border-slate-200 p-2.5">
         <div class="flex gap-4 items-center">
           <div class="w-14 h-14 bg-blue-500 rounded-full"></div>
