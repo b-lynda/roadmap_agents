@@ -15,7 +15,7 @@
         Configuration de la feuille de route
       </h1>
        <div class="py-5">
-          <button class="bg-blue-500 text-white w-auto p-2 rounded-lg">
+          <button id="refresh-btn" class="bg-blue-500 text-white w-auto p-2 rounded-lg">
             Actualiser les données
           </button>
         </div>
@@ -131,6 +131,32 @@
       </svg>
       Télécharger le PDF
     </button>
+
+   <!-- Mini modale de notification moderne -->
+  <div id="notification-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Overlay sombre avec blur -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    
+    <!-- Contenu de la modale -->
+    <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+      <!-- Bouton fermer (X discret) -->
+      <button 
+        id="close-notification" 
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="Fermer"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      
+      <!-- Contenu dynamique -->
+      <div id="notification-content" class="text-center">
+        <!-- Le contenu sera injecté par JS -->
+      </div>
+    </div>
+  </div>
+
     <script src="script.js"></script>
   </body>
 </html>
