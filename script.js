@@ -258,7 +258,7 @@ function displayAgents() {
 function createAgentCard(agent) {
  
   const button = document.createElement('button');
-  button.className = 'w-full p-4 rounded-lg border-2 border-gray-200 hover:border-green-400 hover:bg-green-50 transition text-left group';
+  button.className = `w-full rounded-lg border-2 border-slate-300 mb-4`;
   
   
   const firstLetterInitial = agent.prenom[0].toUpperCase();
@@ -267,15 +267,14 @@ function createAgentCard(agent) {
   
  
   button.innerHTML = `
-    <div class="flex justify-between items-center rounded-md border-2 border-slate-200 p-2.5">
+    <div class="flex justify-between items-center p-2.5">
       <div class="flex gap-4 items-center">
         <div class="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center">
           <p class="text-white font-semibold">${initials}</p>
         </div>
-        
-        <div>
-          <p class="text-slate-600 font-medium">${agent.nom} ${agent.prenom}</p>
-          <p class="text-slate-400">${agent.telephone}</p>
+        <div style="text-align: left;">
+          <p class="text-slate-600 font-medium text-left">${agent.nom} ${agent.prenom}</p>
+          <p class="text-slate-400 text-left">${agent.telephone}</p>
         </div>
       </div>
       
