@@ -10,17 +10,20 @@
     <section
       class="bg-white m-5 rounded-2xl flex flex-col py-5 justify-center shadow-sm"
     >
-    <div class="flex justify-between items-center px-5">
-      <h1 class="text-2xl text-blue-950 font-bold">
-        Configuration de la feuille de route
-      </h1>
-       <div class="py-5">
-          <button id="refresh-btn" class="bg-blue-500 text-white w-auto p-2 rounded-lg">
+      <div class="flex justify-between items-center px-5">
+        <h1 class="text-2xl text-blue-950 font-bold">
+          Configuration de la feuille de route
+        </h1>
+        <div class="py-5">
+          <button
+            id="refresh-btn"
+            class="bg-blue-500 text-white w-auto p-2 rounded-lg"
+          >
             Actualiser les données
           </button>
         </div>
-    </div>
-      
+      </div>
+
       <div class="flex flex-col p-5 justify-between">
         <p class="font-semibold text-slate-600">Date</p>
         <input
@@ -43,8 +46,6 @@
           id=""
           class="py-2 rounded-md border-2 border-slate-300 my-0.5"
         />
-      
-    
       </div>
     </section>
     <section
@@ -55,53 +56,26 @@
         <h2 class="font-semibold text-lg">Agents disponibles</h2>
       </div>
       <div class="relative my-0.5 w-full py-2.5">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-search-icon lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none"
-          >
-            <path d="m21 21-4.34-4.34" />
-            <circle cx="11" cy="11" r="8" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Rechercher un agent"
-            class="py-2 rounded-md border-2 border-slate-300 w-full italic pl-10"
-          />
-        </div>
-      <div class="flex justify-between items-center rounded-md border-2 border-slate-200 p-2.5">
-        <div class="flex gap-4 items-center">
-          <div class="w-14 h-14 bg-blue-500 rounded-full"></div>
-
-          <div>
-            <p class="text-slate-600 font-medium">BOUCHEBAH Lynda</p>
-            <p class="text-slate-400">07 87 09 02 27</p>
-          </div>
-        </div>
-
-        <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-plus-icon lucide-plus"
-          >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-search-icon lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none"
+        >
+          <path d="m21 21-4.34-4.34" />
+          <circle cx="11" cy="11" r="8" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Rechercher un agent"
+          class="py-2 rounded-md border-2 border-slate-300 w-full italic pl-10"
+        />
       </div>
+     <div id="available-agents"></div>
     </section>
     <section
       id="participants-selected"
@@ -132,30 +106,45 @@
       Télécharger le PDF
     </button>
 
-   <!-- Mini modale de notification moderne -->
-  <div id="notification-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-    <!-- Overlay sombre avec blur -->
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-    
-    <!-- Contenu de la modale -->
-    <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
-      <!-- Bouton fermer (X discret) -->
-      <button 
-        id="close-notification" 
-        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-        aria-label="Fermer"
+    <!-- Mini modale de notification moderne -->
+    <div
+      id="notification-modal"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+      <!-- Overlay sombre avec blur -->
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+      <!-- Contenu de la modale -->
+      <div
+        class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-      
-      <!-- Contenu dynamique -->
-      <div id="notification-content" class="text-center">
-        <!-- Le contenu sera injecté par JS -->
+        <!-- Bouton fermer (X discret) -->
+        <button
+          id="close-notification"
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Fermer"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+
+        <!-- Contenu dynamique -->
+        <div id="notification-content" class="text-center">
+          <!-- Le contenu sera injecté par JS -->
+        </div>
       </div>
     </div>
-  </div>
 
     <script src="script.js"></script>
   </body>
