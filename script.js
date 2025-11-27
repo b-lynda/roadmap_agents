@@ -1,4 +1,3 @@
-// URL de la feuille Google Sheets publiée en ligne
 const PUBLISHED_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTFqM-HP22wbmGXw0JbosndL-J6PSW9MlY40dBF4wH2uCkOJXLpT7rTBfn5ZZXz6Kpn8fMCpKhpaCJz/pubhtml";
 const CSV_URL = PUBLISHED_URL.replace("pubhtml", "pub?output=csv");
@@ -12,10 +11,6 @@ let pdfConfig = {
   site: "MONTAGNAC-MONTPEZAT",
   client: "CLUB BELAMBRA - LE VERDON",
 };
-
-// ============================================
-// PARSER CSV
-// ============================================
 
 function parseCSV(csv) {
   // je filtre les lignes vides de mes données récupérées en sautant des lignes :
@@ -44,11 +39,6 @@ function parseCSV(csv) {
     return values;
   });
 }
-
-
-// ============================================
-// CHARGER LES DONNÉES
-// ============================================
 
 async function loadDataFromGoogleSheets() {
   try {
@@ -94,14 +84,14 @@ async function loadDataFromGoogleSheets() {
 
     agents = dataRows
       .filter((row) => row[nomIndex] && row[prenomIndex])
-      .map((row) => ({
+      .map((row, index) => ({
+        id: index + 1, // ✅ Ajoute un ID unique
         nom: row[nomIndex]?.trim() || "",
         prenom: row[prenomIndex]?.trim() || "",
         telephone: row[telIndex]?.trim() || "",
       }));
 
     console.log(`✅ ${agents.length} agents chargés !`);
-
 
     displayAgents();
   } catch (error) {
@@ -129,7 +119,6 @@ function initEventListeners() {
   } else {
     console.error("❌ Bouton #refresh-btn introuvable !");
   }
-
 }
 
 function displayAgents() {
@@ -150,6 +139,7 @@ function displayAgents() {
     const agentCard = createAgentCard(agent);
     agentsContainer.append(agentCard);
   }
+  updateAgentsCount();
 }
 
 function createAgentCard(agent) {
@@ -167,7 +157,7 @@ function createAgentCard(agent) {
         <p class="text-white font-semibold">${initials}</p>
       </div>
       <div style="text-align: left;">
-        <p class="text-slate-600 font-medium text-left">${agent.nom} ${agent.prenom}</p>
+        <p class="text-slate-600 font-medium text-left">${agent.prenom} ${agent.nom}</p>
         <p class="text-slate-400 text-left">${agent.telephone}</p>
       </div>
     </div>
@@ -214,6 +204,7 @@ function createAgentCard(agent) {
           y: (rect.top + rect.height / 2) / window.innerHeight,
         },
       });
+      displayPdfList();
     }
   });
 
@@ -237,10 +228,11 @@ function selectAgent(agent, buttonCard) {
 
   buttonCard.style.borderColor = "#22c55e";
   buttonCard.style.backgroundColor = "#f0fdf4";
+
+  displayPdfList();
 }
 
 function addToPdfList(agent) {
-  // Vérifie si l'agent existe déjà
   const isAlreadyAdded = pdfAgents.some((a) => a.id === agent.id);
 
   if (!isAlreadyAdded) {
@@ -250,6 +242,31 @@ function addToPdfList(agent) {
   } else {
     console.log("⚠️ Agent déjà présent");
     return false; // ← IMPORTANT : retourne false
+  }
+}
+
+function updateAgentsCount() {
+  document.getElementById("agentsList-count").textContent = agents.length;
+}
+
+function displayPdfList() {
+  const pdfCount = document.getElementById("pdf-count");
+  const pdfListContainer = document.getElementById("pdf-list-container");
+
+  pdfCount.textContent = pdfAgents.length;
+  pdfListContainer.innerHTML = "";
+
+  if (pdfAgents.length === 0) {
+    pdfListContainer.innerHTML = `<p class="text-gray-500">Aucun agent dans la liste PDF</p>`;
+  } else {
+    pdfAgents.forEach((agent) => {
+      const agentDiv = document.createElement("div");
+      agentDiv.innerHTML = `
+  <span class="text-slate-700">${agent.prenom} ${agent.nom}</span>
+  <span class="text-slate-400 text-sm">${agent.telephone}</span>
+`;
+      pdfListContainer.append(agentDiv);
+    });
   }
 }
 
