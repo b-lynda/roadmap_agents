@@ -45,81 +45,6 @@ function parseCSV(csv) {
   });
 }
 
-// ============================================
-// NOTIFICATION MODALE
-// ============================================
-
-function showNotification(message, type = "success") {
-  const modal = document.getElementById("notification-modal");
-  const content = document.getElementById("notification-content");
-  const closeBtn = document.getElementById("close-notification");
-
-  if (!modal || !content) {
-    console.warn("⚠️ Éléments de notification introuvables");
-    return;
-  }
-
-  const configs = {
-    success: {
-      icon: `
-        <svg class="w-16 h-16 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      `,
-      color: "text-green-600",
-    },
-    error: {
-      icon: `
-        <svg class="w-16 h-16 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      `,
-      color: "text-red-600",
-    },
-    loading: {
-      icon: `
-        <svg class="animate-spin w-16 h-16 mx-auto mb-4 text-blue-500" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      `,
-      color: "text-blue-600",
-    },
-  };
-
-  const config = configs[type] || configs.success;
-
-  content.innerHTML = `
-    ${config.icon}
-    <p class="text-xl font-semibold ${config.color} mb-2">${message}</p>
-  `;
-
-  if (closeBtn) {
-    closeBtn.style.display = type === "loading" ? "none" : "block";
-  }
-
-  modal.classList.remove("hidden");
-  modal.style.opacity = "0";
-  setTimeout(() => {
-    modal.style.opacity = "1";
-  }, 10);
-
-  if (type !== "loading") {
-    setTimeout(() => {
-      hideNotification();
-    }, 2500);
-  }
-}
-
-function hideNotification() {
-  const modal = document.getElementById("notification-modal");
-  if (modal) {
-    modal.style.opacity = "0";
-    setTimeout(() => {
-      modal.classList.add("hidden");
-    }, 300);
-  }
-}
 
 // ============================================
 // CHARGER LES DONNÉES
@@ -127,8 +52,6 @@ function hideNotification() {
 
 async function loadDataFromGoogleSheets() {
   try {
-    showNotification("Chargement en cours...", "loading");
-
     console.log("📥 Chargement des données...");
 
     const response = await fetch(CSV_URL);
@@ -179,7 +102,6 @@ async function loadDataFromGoogleSheets() {
 
     console.log(`✅ ${agents.length} agents chargés !`);
 
-    showNotification(`${agents.length} agents chargés !`, "success");
 
     displayAgents();
   } catch (error) {
@@ -208,40 +130,6 @@ function initEventListeners() {
     console.error("❌ Bouton #refresh-btn introuvable !");
   }
 
-  // Bouton de fermeture de la modale
-  const closeBtn = document.getElementById("close-notification");
-
-  if (closeBtn) {
-    console.log("✅ Bouton fermeture modale connecté !");
-    closeBtn.addEventListener("click", () => {
-      console.log("❌ Clic sur fermeture modale");
-      hideNotification();
-    });
-  } else {
-    console.warn("⚠️ Bouton #close-notification introuvable");
-  }
-
-  // Fermer en cliquant sur l'overlay
-  const modal = document.getElementById("notification-modal");
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        console.log("📍 Clic sur overlay");
-        hideNotification();
-      }
-    });
-  }
-
-  // Fermer avec Échap
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      const modal = document.getElementById("notification-modal");
-      if (modal && !modal.classList.contains("hidden")) {
-        console.log("⌨️ Fermeture via Échap");
-        hideNotification();
-      }
-    }
-  });
 }
 
 function displayAgents() {
