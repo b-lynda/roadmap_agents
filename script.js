@@ -1,11 +1,12 @@
 // URL de la feuille Google Sheets publiée en ligne
 const PUBLISHED_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRYvfS6YKbBtOMa2907HUQ_739hVHZV8iHoJlkOlPL7tSlx74zJLTTTlTSsaCIwt8bjE5l4-02Ap2-A/pubhtml";
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTFqM-HP22wbmGXw0JbosndL-J6PSW9MlY40dBF4wH2uCkOJXLpT7rTBfn5ZZXz6Kpn8fMCpKhpaCJz/pubhtml";
 const CSV_URL = PUBLISHED_URL.replace("pubhtml", "pub?output=csv");
 
 let agents = [];
 let selectedAgent = null;
 let selectedList = [];
+let pdfAgents = [];
 let pdfConfig = {
   date: "10 juin 2025",
   site: "MONTAGNAC-MONTPEZAT",
@@ -272,40 +273,60 @@ function createAgentCard(agent) {
   const initials = firstLetterInitial + secondLetterInitial;
 
   button.innerHTML = `
-    <div class="flex justify-between items-center p-2.5">
-      <div class="flex gap-4 items-center">
-        <div class="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center">
-          <p class="text-white font-semibold">${initials}</p>
-        </div>
-        <div style="text-align: left;">
-          <p class="text-slate-600 font-medium text-left">${agent.nom} ${agent.prenom}</p>
-          <p class="text-slate-400 text-left">${agent.telephone}</p>
-        </div>
+  <div class="flex justify-between items-center p-2.5">
+    <div class="flex gap-4 items-center">
+      <div class="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center">
+        <p class="text-white font-semibold">${initials}</p>
       </div>
-      
-      <div>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-plus"
-        >
-          <path d="M5 12h14" />
-          <path d="M12 5v14" />
-        </svg>
+      <div style="text-align: left;">
+        <p class="text-slate-600 font-medium text-left">${agent.nom} ${agent.prenom}</p>
+        <p class="text-slate-400 text-left">${agent.telephone}</p>
       </div>
     </div>
-  `;
+    <button class="add-pdf-btn bg-green-500 border-2 border-green-400 w-fit p-2 rounded-md
+     text-white" style="display: none;" data-agent-id="${agent.id}">
+      Ajouter
+    </button>
+  </div>
+`;
 
   button.addEventListener("click", () => {
+    document.querySelectorAll(".add-pdf-btn").forEach((btn) => {
+      btn.style.display = "none";
+    });
+
+    const thisButton = button.querySelector(".add-pdf-btn");
+    if (thisButton) {
+      thisButton.style.display = "block";
+    }
+
     selectAgent(agent, button);
-    console.log("✅ Agent sélectionné:", selectedAgent);
+  });
+
+  button.querySelector(".add-pdf-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    const success = addToPdfList(agent);
+
+    if (success) {
+      const addButton = button.querySelector(".add-pdf-btn");
+      addButton.textContent = "✓ Ajouté";
+      addButton.style.backgroundColor = "#10b981";
+      addButton.style.borderColor = "#10b981";
+      addButton.disabled = true;
+
+      // 🎉 CONFETTIS bouton
+      const rect = addButton.getBoundingClientRect();
+      confetti({
+        particleCount: 50,
+        angle: 90,
+        spread: 45,
+        origin: {
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight,
+        },
+      });
+    }
   });
 
   return button;
@@ -314,30 +335,35 @@ function createAgentCard(agent) {
 function selectAgent(agent, buttonCard) {
   selectedAgent = agent;
   const allCards = document.querySelectorAll("#available-agents button");
-  
+
   allCards.forEach((btn) => {
-    // Réinitialiser avec Tailwind
     btn.classList.remove("border-green-500", "bg-green-50");
     btn.classList.add("border-slate-200");
-    
-    // Forcer avec du style inline
-    btn.style.borderColor = ""; // Retire le style inline
-    btn.style.backgroundColor = ""; // Retire le style inline
+
+    btn.style.borderColor = "";
+    btn.style.backgroundColor = "";
   });
 
-  // Sur la carte cliquée
   buttonCard.classList.remove("border-slate-200");
   buttonCard.classList.add("border-green-500", "bg-green-50");
-  
-  // FORCER avec du style inline
-  buttonCard.style.borderColor = "#22c55e"; // Vert (green-500)
-  buttonCard.style.backgroundColor = "#f0fdf4"; // Fond vert clair (green-50)
-  
-  console.log("✅ Agent sélectionné :", agent.nom, agent.prenom);
+
+  buttonCard.style.borderColor = "#22c55e";
+  buttonCard.style.backgroundColor = "#f0fdf4";
 }
 
-// INITIALISATION
-// ============================================
+function addToPdfList(agent) {
+  // Vérifie si l'agent existe déjà
+  const isAlreadyAdded = pdfAgents.some((a) => a.id === agent.id);
+
+  if (!isAlreadyAdded) {
+    pdfAgents.push(agent);
+    console.log("✅ Agent ajouté:", agent);
+    return true; // ← IMPORTANT : retourne true
+  } else {
+    console.log("⚠️ Agent déjà présent");
+    return false; // ← IMPORTANT : retourne false
+  }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ Application démarrée !");
