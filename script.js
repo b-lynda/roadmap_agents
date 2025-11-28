@@ -91,8 +91,6 @@ async function loadDataFromGoogleSheets() {
         telephone: row[telIndex]?.trim() || "",
       }));
 
-    console.log(`✅ ${agents.length} agents chargés !`);
-
     displayAgents();
   } catch (error) {
     console.error("❌ ERREUR:", error);
@@ -105,15 +103,11 @@ async function loadDataFromGoogleSheets() {
 }
 
 function initEventListeners() {
-  console.log("🎯 Initialisation des événements...");
-
   // Bouton Actualiser (refresh-btn)
   const refreshBtn = document.getElementById("refresh-btn");
 
   if (refreshBtn) {
-    console.log("✅ Bouton Actualiser connecté !");
     refreshBtn.addEventListener("click", () => {
-      console.log("🔄 Actualisation...");
       loadDataFromGoogleSheets();
     });
   } else {
@@ -237,10 +231,8 @@ function addToPdfList(agent) {
 
   if (!isAlreadyAdded) {
     pdfAgents.push(agent);
-    console.log("✅ Agent ajouté:", agent);
     return true; // ← IMPORTANT : retourne true
   } else {
-    console.log("⚠️ Agent déjà présent");
     return false; // ← IMPORTANT : retourne false
   }
 }
@@ -262,17 +254,38 @@ function displayPdfList() {
     pdfAgents.forEach((agent) => {
       const agentDiv = document.createElement("div");
       agentDiv.innerHTML = `
-  <span class="text-slate-700">${agent.prenom} ${agent.nom}</span>
-  <span class="text-slate-400 text-sm">${agent.telephone}</span>
-`;
+      <div style="display: flex; gap: 5px; align-items: center; 
+      padding: 10px; border-bottom: 1px solid #ccc;">
+        <button style="background-color: red; color: white; padding: 5px 10px; border: none; 
+        border-radius: 5px;" data-agent-id="${agent.id}">Supprimer</button>
+        <span>${agent.prenom} ${agent.nom}</span>
+      </div>`;
+      const deleteButton = agentDiv.querySelector('button');
+      deleteButton.addEventListener('click', () => {
+        removeFromPdfList(agent.id);
+      })
       pdfListContainer.append(agentDiv);
     });
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ Application démarrée !");
+function removeFromPdfList(agentId) { 
+  pdfAgents = pdfAgents.filter((agent) => agent.id !== agentId);
 
+  const allAddButtons = document.querySelectorAll('.add-pdf-btn');
+  allAddButtons.forEach((btn) => {
+    if (btn.dataset.agentId == agentId) { 
+      btn.textContent = "Ajouter";
+      btn.style.backgroundColor = "#10b981";
+      btn.style.borderColor = "#10b981";
+      btn.disabled = false;
+    }
+  });
+
+  displayPdfList();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     initEventListeners();
     loadDataFromGoogleSheets();
