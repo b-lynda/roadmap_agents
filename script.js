@@ -113,6 +113,9 @@ function initEventListeners() {
   } else {
     console.error("❌ Bouton #refresh-btn introuvable !");
   }
+  document.getElementById("download-pdf").addEventListener("click", () => {
+    generatePDF();
+  });
 }
 
 function displayAgents() {
@@ -138,21 +141,21 @@ function displayAgents() {
 
 function createAgentCard(agent) {
   const button = document.createElement("button");
-  button.className = `w-full rounded-lg border-2 border-slate-200 mb-4`;
+  button.classList.add("agent-card");
 
   const firstLetterInitial = agent.prenom[0].toUpperCase();
   const secondLetterInitial = agent.nom[0].toUpperCase();
   const initials = firstLetterInitial + secondLetterInitial;
 
   button.innerHTML = `
-  <div class="flex justify-between items-center p-2.5">
+  <div class="w-full rounded-lg border-2 border-slate-200 mb-4 flex justify-between items-center p-2.5">
     <div class="flex gap-4 items-center">
       <div class="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center">
         <p class="text-white font-semibold">${initials}</p>
       </div>
       <div style="text-align: left;">
-        <p class="text-slate-600 font-medium text-left">${agent.prenom} ${agent.nom}</p>
-        <p class="text-slate-400 text-left">${agent.telephone}</p>
+        <p class="agent-name text-slate-600 font-medium text-left">${agent.prenom} ${agent.nom}</p>
+        <p class="agent-phone text-slate-400 text-left">${agent.telephone}</p>
       </div>
     </div>
     <button class="add-pdf-btn bg-green-500 border-2 border-green-400 w-fit p-2 rounded-md
@@ -260,21 +263,21 @@ function displayPdfList() {
         border-radius: 5px;" data-agent-id="${agent.id}">Supprimer</button>
         <span>${agent.prenom} ${agent.nom}</span>
       </div>`;
-      const deleteButton = agentDiv.querySelector('button');
-      deleteButton.addEventListener('click', () => {
+      const deleteButton = agentDiv.querySelector("button");
+      deleteButton.addEventListener("click", () => {
         removeFromPdfList(agent.id);
-      })
+      });
       pdfListContainer.append(agentDiv);
     });
   }
 }
 
-function removeFromPdfList(agentId) { 
+function removeFromPdfList(agentId) {
   pdfAgents = pdfAgents.filter((agent) => agent.id !== agentId);
 
-  const allAddButtons = document.querySelectorAll('.add-pdf-btn');
+  const allAddButtons = document.querySelectorAll(".add-pdf-btn");
   allAddButtons.forEach((btn) => {
-    if (btn.dataset.agentId == agentId) { 
+    if (btn.dataset.agentId == agentId) {
       btn.textContent = "Ajouter";
       btn.style.backgroundColor = "#10b981";
       btn.style.borderColor = "#10b981";
@@ -284,6 +287,47 @@ function removeFromPdfList(agentId) {
 
   displayPdfList();
 }
+
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // Récupérer les valeurs
+  const date = document.getElementById('roadmap-date').value;
+  const site = document.getElementById('roadmap-site').value;
+  const client = document.getElementById('roadmap-client').value;
+  
+  // Titre
+  doc.setFontSize(20);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Feuille de pointage", 105, 20, { align: 'center' });
+  
+  // Infos
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Date: ${date || 'Non renseignée'}`, 20, 40);
+  doc.text(`Site: ${site || 'Non renseigné'}`, 20, 48);
+  doc.text(`Client: ${client || 'Non renseigné'}`, 20, 56);
+  
+  // Tableau des agents
+  const tableData = pdfAgents.map(agent => [
+    agent.nom,
+    agent.prenom,
+    agent.telephone,
+    agent.poste || '',
+    ''
+  ]);
+  
+  doc.autoTable({
+    head: [['Nom', 'Prénom', 'Téléphone', 'Poste', 'Signature']],
+    body: tableData,
+    startY: 65, // ← Le tableau commence bien après les infos
+  });
+  
+  doc.save("roadmap-agents.pdf");
+}
+
+console.log(window.jspdf);
 
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
