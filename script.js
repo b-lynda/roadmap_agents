@@ -12,6 +12,7 @@ let pdfConfig = {
   site: "MONTAGNAC-MONTPEZAT",
   client: "CLUB BELAMBRA - LE VERDON",
 };
+let searchResults = [];
 
 
 function parseCSV(csv) {
@@ -92,6 +93,7 @@ async function loadDataFromGoogleSheets() {
         prenom: row[prenomIndex]?.trim() || "",
         telephone: row[telIndex]?.trim() || "",
       }));
+    searchResults = [...agents];
 
     displayAgents();
   } catch (error) {
@@ -118,6 +120,21 @@ function initEventListeners() {
   document.getElementById("download-pdf").addEventListener("click", () => {
     generatePDF();
   });
+
+  const searchInput = document.getElementById('agentSearch');
+
+   if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      searchAgents(e.target.value);
+    });
+  } else {
+    console.error("❌ Champ de recherche #agentSearch introuvable !");
+  }
+  
+  searchInput.addEventListener("input", (e) => {
+    searchAgents(e.target.value);
+  });
+
 }
 
 function displayAgents() {
@@ -128,17 +145,31 @@ function displayAgents() {
   }
   agentsContainer.innerHTML = "";
 
-  if (agents.length === 0) {
+  if (searchResults.length === 0) {
     agentsContainer.innerHTML =
       '<p class="text-gray-500">Aucun agent disponible</p>';
     return;
   }
 
-  for (const agent of agents) {
+  for (const agent of searchResults) {
     const agentCard = createAgentCard(agent);
     agentsContainer.append(agentCard);
   }
   updateAgentsCount();
+}
+
+function searchAgents(searchTerm) {
+  if (!searchTerm) {
+    searchResults = [...agents]
+  } else {
+    searchResults = agents.filter(agent => {
+      const search = searchTerm.toLowerCase();
+      const nomMatch = agent.nom.toLowerCase().includes(search);
+      const prenomMatch = agent.prenom.toLowerCase().includes(search);
+      return nomMatch || prenomMatch;
+    })
+  }
+  displayAgents();
 }
 
 function createAgentCard(agent) {
@@ -243,7 +274,7 @@ function addToPdfList(agent) {
 }
 
 function updateAgentsCount() {
-  document.getElementById("agentsList-count").textContent = agents.length;
+  document.getElementById("agentsList-count").textContent = searchResults.length;
 }
 
 function displayPdfList() {
