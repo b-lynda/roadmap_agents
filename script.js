@@ -3,6 +3,7 @@ const PUBLISHED_URL =
 const CSV_URL = PUBLISHED_URL.replace("pubhtml", "pub?output=csv");
 
 let agents = [];
+let postes = ['AP', 'CT', 'APC', 'CTC'];
 let selectedAgent = null;
 let selectedList = [];
 let pdfAgents = [];
@@ -11,6 +12,7 @@ let pdfConfig = {
   site: "MONTAGNAC-MONTPEZAT",
   client: "CLUB BELAMBRA - LE VERDON",
 };
+
 
 function parseCSV(csv) {
   // je filtre les lignes vides de mes données récupérées en sautant des lignes :
@@ -231,9 +233,9 @@ function selectAgent(agent, buttonCard) {
 
 function addToPdfList(agent) {
   const isAlreadyAdded = pdfAgents.some((a) => a.id === agent.id);
-
+  const agentAvecPoste = { ...agent, poste: "ap" };
   if (!isAlreadyAdded) {
-    pdfAgents.push(agent);
+    pdfAgents.push(agentAvecPoste);
     return true; // ← IMPORTANT : retourne true
   } else {
     return false; // ← IMPORTANT : retourne false
@@ -259,14 +261,27 @@ function displayPdfList() {
       agentDiv.innerHTML = `
       <div style="display: flex; gap: 5px; align-items: center; 
       padding: 10px; border-bottom: 1px solid #ccc;">
-        <button style="background-color: red; color: white; padding: 5px 10px; border: none; 
+      <select class="p-2 border-2 border-slate-300 rounded-lg" data-agent-id="${agent.id}">
+        <option value="AP" selected>AP</option>
+        <option value="APC">APC</option>
+        <option value="CT">CT</option>
+        <option value="CTC">CTC</option>
+        </select>
+        <button style="background-color: red; color: white; padding: 8px; border: none; 
         border-radius: 5px;" data-agent-id="${agent.id}">Supprimer</button>
         <span>${agent.prenom} ${agent.nom}</span>
+        
       </div>`;
       const deleteButton = agentDiv.querySelector("button");
       deleteButton.addEventListener("click", () => {
         removeFromPdfList(agent.id);
       });
+
+    const posteSelect = agentDiv.querySelector("select");
+    posteSelect.addEventListener("change", (e) => {
+      agent.poste = e.target.value;
+    });
+
       pdfListContainer.append(agentDiv);
     });
   }
