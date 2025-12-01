@@ -324,15 +324,25 @@ function generatePDF() {
   doc.text(`Site: ${site || 'Non renseigné'}`, 20, 48);
   doc.text(`Client: ${client || 'Non renseigné'}`, 20, 56);
   
-  // Tableau des agents
-  const tableData = pdfAgents.map(agent => [
+ 
+const pdfAgentsTries = [...pdfAgents].sort((a, b) => {
+  // 1. Si un agent est CT et pas l'autre, le CT vient en premier
+  if (a.poste === 'CT' && b.poste !== 'CT') return -1;
+  if (a.poste !== 'CT' && b.poste === 'CT') return 1;
+  
+  // 2. Sinon, on trie par ordre alphabétique des noms
+  return a.nom.localeCompare(b.nom);
+});
+  
+const tableData = pdfAgentsTries.map(agent => [
     agent.nom,
     agent.prenom,
     agent.telephone,
     agent.poste || '',
     ''
-  ]);
-  
+  ])
+
+    
   doc.autoTable({
     head: [['Nom', 'Prénom', 'Téléphone', 'Poste', 'Signature']],
     body: tableData,
