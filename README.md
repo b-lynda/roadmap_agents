@@ -7,4 +7,5 @@
 - [x] Génerer un fichier PDF
 - [x] Rechercher des agents
 - [x] Modification du statut des agents
-- [ ] Pagination - Afficher seulement les 5 premiers agents
+- [x] Pagination - Afficher les agents 5/5
+- [ ] Utilisation de Google Apps Script + Web App pour les données
