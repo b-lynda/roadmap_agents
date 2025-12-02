@@ -5,5 +5,6 @@
 - [x] Actualisation des agents renseignés
 - [x] Ajout et suppression des agents
 - [x] Génerer un fichier PDF
-- [ ] Rechercher des agents
-- [ ] Modification du statut des agents
+- [x] Rechercher des agents
+- [x] Modification du statut des agents
+- [ ] Pagination - Afficher seulement les 5 premiers agents

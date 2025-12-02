@@ -13,6 +13,8 @@ let pdfConfig = {
   client: "CLUB BELAMBRA - LE VERDON",
 };
 let searchResults = [];
+let agentsToShow = 5;
+let agentsPerPage = 5;
 
 
 function parseCSV(csv) {
@@ -135,9 +137,17 @@ function initEventListeners() {
     searchAgents(e.target.value);
   });
 
+  const loadMoreBtn = document.getElementById("load-more-btn");
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", () => {
+      loadMoreAgents();
+    });
+  } 
+
 }
 
 function displayAgents() {
+  console.log("🚀 displayAgents() appelée !");
   const agentsContainer = document.getElementById("available-agents");
   if (!agentsContainer) {
     console.error("❌ Élément #available-agents introuvable !");
@@ -145,20 +155,38 @@ function displayAgents() {
   }
   agentsContainer.innerHTML = "";
 
+
+
   if (searchResults.length === 0) {
     agentsContainer.innerHTML =
       '<p class="text-gray-500">Aucun agent disponible</p>';
     return;
   }
 
-  for (const agent of searchResults) {
+
+
+  const agentsToDisplay = searchResults.slice(0, agentsToShow);
+  console.log("📊 agentsToDisplay.length:", agentsToDisplay.length)
+
+  for (const agent of agentsToDisplay) {
     const agentCard = createAgentCard(agent);
     agentsContainer.append(agentCard);
   }
   updateAgentsCount();
+
+  const loadMoreBtn = document.getElementById("load-more-btn");
+
+  if (loadMoreBtn){
+    if (agentsToShow < searchResults.length) {
+      loadMoreBtn.style.display = "block"
+    } else {
+      loadMoreBtn.style.display = "none"
+    } 
+  }
 }
 
 function searchAgents(searchTerm) {
+   agentsToShow = 5;
   if (!searchTerm) {
     searchResults = [...agents]
   } else {
@@ -264,7 +292,7 @@ function selectAgent(agent, buttonCard) {
 
 function addToPdfList(agent) {
   const isAlreadyAdded = pdfAgents.some((a) => a.id === agent.id);
-  const agentAvecPoste = { ...agent, poste: "ap" };
+  const agentAvecPoste = { ...agent, poste: "AP" };
   if (!isAlreadyAdded) {
     pdfAgents.push(agentAvecPoste);
     return true; // ← IMPORTANT : retourne true
@@ -275,6 +303,11 @@ function addToPdfList(agent) {
 
 function updateAgentsCount() {
   document.getElementById("agentsList-count").textContent = searchResults.length;
+}
+
+function loadMoreAgents() {
+  agentsToShow += agentsPerPage;
+  displayAgents();
 }
 
 function displayPdfList() {
@@ -357,8 +390,8 @@ function generatePDF() {
   
  
 const pdfAgentsTries = [...pdfAgents].sort((a, b) => {
-  // 1. Si un agent est CT et pas l'autre, le CT vient en premier
-  if (a.poste === 'CT' && b.poste !== 'CT') return -1;
+  // 1. Si un agent est CT ou CTC et pas l'autre, le CT vient en premier
+  if (a.poste === 'CT' || a.poste === 'CTC' &&  b.poste !== 'CT') return -1;
   if (a.poste !== 'CT' && b.poste === 'CT') return 1;
   
   // 2. Sinon, on trie par ordre alphabétique des noms
