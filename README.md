@@ -9,3 +9,4 @@
 - [x] Modification du statut des agents
 - [x] Pagination - Afficher les agents 5/5
 - [ ] Utilisation de Google Apps Script + Web App pour les données
+- [ ] Sauvegarde de plusieurs listes non terminées en même temps

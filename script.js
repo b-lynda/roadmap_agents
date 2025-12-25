@@ -1,3 +1,31 @@
+// ============================================
+// 🔄 STORAGE OPTIMISÉ (MODIFIÉ)
+// ============================================
+const STORAGE = {
+    key: () => document.getElementById('projectName')?.value.trim() || 'default',
+    
+    save: () => {
+        localStorage.setItem(STORAGE.key(), JSON.stringify(pdfAgents));
+        updatePageTitle(); // 🆕 AJOUT : Auto-update du titre
+    },
+    
+    load: () => JSON.parse(localStorage.getItem(STORAGE.key()) || '[]')
+};
+
+// 🆕 NOUVELLE FONCTION : Mise à jour du titre
+function updatePageTitle() {
+    const projectName = STORAGE.key();
+    const count = pdfAgents.length;
+    const base = "Feuille de route vide";
+    
+    document.title = projectName !== 'default'
+        ? (count > 0 ? `📋 ${projectName} (${count})` : `📋 ${projectName}`)
+        : (count > 0 ? `${base} (${count})` : base);
+}
+
+// ============================================
+// CONFIGURATION ET VARIABLES
+// ============================================
 const PUBLISHED_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTFqM-HP22wbmGXw0JbosndL-J6PSW9MlY40dBF4wH2uCkOJXLpT7rTBfn5ZZXz6Kpn8fMCpKhpaCJz/pubhtml";
 const CSV_URL = PUBLISHED_URL.replace("pubhtml", "pub?output=csv");
@@ -6,7 +34,7 @@ let agents = [];
 let postes = ['AP', 'CT', 'APC', 'CTC'];
 let selectedAgent = null;
 let selectedList = [];
-let pdfAgents = [];
+let pdfAgents = STORAGE.load();
 let pdfConfig = {
   date: "10 juin 2025",
   site: "MONTAGNAC-MONTPEZAT",
@@ -18,13 +46,8 @@ let agentsPerPage = 5;
 
 
 function parseCSV(csv) {
-  // je filtre les lignes vides de mes données récupérées en sautant des lignes :
   const lines = csv.split("\n").filter((line) => line.trim());
 
-  /* 
-  je change les lignes de mon tab avec map, j'initialise un tab vide dans lequel je vais remplir
-  mes données dans la var current
-  */
   return lines.map((line) => {
     const values = [];
     let current = "";
@@ -90,7 +113,7 @@ async function loadDataFromGoogleSheets() {
     agents = dataRows
       .filter((row) => row[nomIndex] && row[prenomIndex])
       .map((row, index) => ({
-        id: index + 1, // ✅ Ajoute un ID unique
+        id: index + 1,
         nom: row[nomIndex]?.trim() || "",
         prenom: row[prenomIndex]?.trim() || "",
         telephone: row[telIndex]?.trim() || "",
@@ -109,7 +132,6 @@ async function loadDataFromGoogleSheets() {
 }
 
 function initEventListeners() {
-  // Bouton Actualiser (refresh-btn)
   const refreshBtn = document.getElementById("refresh-btn");
 
   if (refreshBtn) {
@@ -147,7 +169,6 @@ function initEventListeners() {
 }
 
 function displayAgents() {
-  console.log("🚀 displayAgents() appelée !");
   const agentsContainer = document.getElementById("available-agents");
   if (!agentsContainer) {
     console.error("❌ Élément #available-agents introuvable !");
@@ -155,18 +176,13 @@ function displayAgents() {
   }
   agentsContainer.innerHTML = "";
 
-
-
   if (searchResults.length === 0) {
     agentsContainer.innerHTML =
       '<p class="text-gray-500">Aucun agent disponible</p>';
     return;
   }
 
-
-
   const agentsToDisplay = searchResults.slice(0, agentsToShow);
-  console.log("📊 agentsToDisplay.length:", agentsToDisplay.length)
 
   for (const agent of agentsToDisplay) {
     const agentCard = createAgentCard(agent);
@@ -251,7 +267,6 @@ function createAgentCard(agent) {
       addButton.style.borderColor = "#10b981";
       addButton.disabled = true;
 
-      // 🎉 CONFETTIS bouton
       const rect = addButton.getBoundingClientRect();
       confetti({
         particleCount: 50,
@@ -290,15 +305,14 @@ function selectAgent(agent, buttonCard) {
   displayPdfList();
 }
 
+// ✅ FONCTION OPTIMISÉE (STORAGE.save() met à jour le titre automatiquement)
 function addToPdfList(agent) {
   const isAlreadyAdded = pdfAgents.some((a) => a.id === agent.id);
-  const agentAvecPoste = { ...agent, poste: "AP" };
-  if (!isAlreadyAdded) {
-    pdfAgents.push(agentAvecPoste);
-    return true; // ← IMPORTANT : retourne true
-  } else {
-    return false; // ← IMPORTANT : retourne false
-  }
+  if (isAlreadyAdded) return false;
+  
+  pdfAgents.push({ ...agent, poste: "AP" });
+  STORAGE.save(); // ← Sauvegarde + update titre automatique
+  return true;
 }
 
 function updateAgentsCount() {
@@ -319,40 +333,42 @@ function displayPdfList() {
 
   if (pdfAgents.length === 0) {
     pdfListContainer.innerHTML = `<p class="text-gray-500">Aucun agent dans la liste PDF</p>`;
-  } else {
-    pdfAgents.forEach((agent) => {
-      const agentDiv = document.createElement("div");
-      agentDiv.innerHTML = `
-      <div style="display: flex; gap: 5px; align-items: center; 
-      padding: 10px; border-bottom: 1px solid #ccc;">
-      <select class="p-2 border-2 border-slate-300 rounded-lg" data-agent-id="${agent.id}">
-        <option value="AP" selected>AP</option>
-        <option value="APC">APC</option>
-        <option value="CT">CT</option>
-        <option value="CTC">CTC</option>
-        </select>
-        <button style="background-color: red; color: white; padding: 8px; border: none; 
-        border-radius: 5px;" data-agent-id="${agent.id}">Supprimer</button>
-        <span>${agent.prenom} ${agent.nom}</span>
-        
-      </div>`;
-      const deleteButton = agentDiv.querySelector("button");
-      deleteButton.addEventListener("click", () => {
-        removeFromPdfList(agent.id);
-      });
-
-    const posteSelect = agentDiv.querySelector("select");
-    posteSelect.addEventListener("change", (e) => {
-      agent.poste = e.target.value;
-    });
-
-      pdfListContainer.append(agentDiv);
-    });
+    return; // 🔄 AJOUT : return early pour éviter code inutile
   }
+
+  pdfAgents.forEach((agent) => {
+    const agentDiv = document.createElement("div");
+    agentDiv.innerHTML = `
+    <div style="display: flex; gap: 5px; align-items: center; 
+    padding: 10px; border-bottom: 1px solid #ccc;">
+      <select class="p-2 border-2 border-slate-300 rounded-lg" data-agent-id="${agent.id}">
+        <option value="AP" ${agent.poste === 'AP' ? 'selected' : ''}>AP</option>
+        <option value="APC" ${agent.poste === 'APC' ? 'selected' : ''}>APC</option>
+        <option value="CT" ${agent.poste === 'CT' ? 'selected' : ''}>CT</option>
+        <option value="CTC" ${agent.poste === 'CTC' ? 'selected' : ''}>CTC</option>
+      </select>
+      <button style="background-color: red; color: white; padding: 8px; border: none; 
+      border-radius: 5px;" data-agent-id="${agent.id}">Supprimer</button>
+      <span>${agent.prenom} ${agent.nom}</span>
+    </div>`;
+    
+    agentDiv.querySelector("button").addEventListener("click", () => {
+      removeFromPdfList(agent.id);
+    });
+
+    agentDiv.querySelector("select").addEventListener("change", (e) => {
+      agent.poste = e.target.value;
+      STORAGE.save(); // ← Sauvegarde + update titre automatique
+    });
+
+    pdfListContainer.append(agentDiv);
+  });
 }
 
+// ✅ FONCTION OPTIMISÉE
 function removeFromPdfList(agentId) {
   pdfAgents = pdfAgents.filter((agent) => agent.id !== agentId);
+  STORAGE.save(); // ← Sauvegarde + update titre automatique
 
   const allAddButtons = document.querySelectorAll(".add-pdf-btn");
   allAddButtons.forEach((btn) => {
@@ -371,46 +387,38 @@ function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   
-  // Récupérer les valeurs
   const date = document.getElementById('roadmap-date').value;
   const site = document.getElementById('roadmap-site').value;
   const client = document.getElementById('roadmap-client').value;
   
-  // Titre
   doc.setFontSize(20);
   doc.setTextColor(0, 0, 0);
   doc.text("Feuille de pointage", 105, 20, { align: 'center' });
   
-  // Infos
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.text(`Date: ${date || 'Non renseignée'}`, 20, 40);
   doc.text(`Site: ${site || 'Non renseigné'}`, 20, 48);
   doc.text(`Client: ${client || 'Non renseigné'}`, 20, 56);
   
- 
-const pdfAgentsTries = [...pdfAgents].sort((a, b) => {
-  // 1. Si un agent est CT ou CTC et pas l'autre, le CT vient en premier
-  if (a.poste === 'CT' || a.poste === 'CTC' &&  b.poste !== 'CT') return -1;
-  if (a.poste !== 'CT' && b.poste === 'CT') return 1;
+  const pdfAgentsTries = [...pdfAgents].sort((a, b) => {
+    if ((a.poste === 'CT' || a.poste === 'CTC') && b.poste !== 'CT' && b.poste !== 'CTC') return -1;
+    if ((b.poste === 'CT' || b.poste === 'CTC') && a.poste !== 'CT' && a.poste !== 'CTC') return 1;
+    return a.nom.localeCompare(b.nom);
+  });
   
-  // 2. Sinon, on trie par ordre alphabétique des noms
-  return a.nom.localeCompare(b.nom);
-});
-  
-const tableData = pdfAgentsTries.map(agent => [
+  const tableData = pdfAgentsTries.map(agent => [
     agent.nom,
     agent.prenom,
     agent.telephone,
     agent.poste || '',
     ''
-  ])
-
+  ]);
     
   doc.autoTable({
     head: [['Nom', 'Prénom', 'Téléphone', 'Poste', 'Signature']],
     body: tableData,
-    startY: 65, // ← Le tableau commence bien après les infos
+    startY: 65,
   });
   
   doc.save("roadmap-agents.pdf");
@@ -418,9 +426,34 @@ const tableData = pdfAgentsTries.map(agent => [
 
 console.log(window.jspdf);
 
+// ✅ DOMCONTENTLOADED OPTIMISÉ
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
+    pdfAgents = STORAGE.load();
+    
     initEventListeners();
     loadDataFromGoogleSheets();
+    
+    if (pdfAgents.length > 0) {
+      displayPdfList();
+    }
+    
+    updatePageTitle(); // 🆕 AJOUT : Initialisation du titre
+    
+    const projectInput = document.getElementById('projectName');
+    if (projectInput) {
+      // 🆕 AJOUT : Mise à jour dynamique pendant frappe
+      projectInput.addEventListener('input', () => {
+        updatePageTitle();
+      });
+      
+      // Chargement du projet après validation
+      projectInput.addEventListener('change', () => {
+        pdfAgents = STORAGE.load();
+        displayPdfList();
+        updatePageTitle(); // 🆕 AJOUT : Update après chargement
+        console.log(`✅ Projet "${STORAGE.key()}" chargé (${pdfAgents.length} agents)`);
+      });
+    }
   }, 100);
 });
