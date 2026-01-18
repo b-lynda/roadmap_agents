@@ -1,3 +1,5 @@
+[![forthebadge](/badges/75-percent-optimized.svg)](https://forthebadge.com)
+
 # Feuille de présence dynamique :dizzy:
 >_"Configuration d'une feuille de présence connectée à un fichier de renseignements, pour des salariés en déplacements ponctuels."_
 
